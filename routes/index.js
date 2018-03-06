@@ -321,4 +321,27 @@ router.get("/functionality?", function(req, res){
     });
 });
 
+router.get("/generateSyncId", function(req, res){
+  
+  var db = req.arango.db;
+
+  db.query(aqlQuery`
+    FOR device IN devices
+      FOR app in device.apps[*]
+        FILTER app.syncID != "-1"
+        RETURN app
+    `)
+    .then(function(result){
+      console.log(result._result[0]);
+      if(result._result.length == 0){
+        
+      }
+      res.status(200).send(true);
+    })
+    .catch(function(err){
+      res.status(400).send( { 'message': err.toString() } );
+    });
+    
+});
+
 module.exports = router;

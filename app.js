@@ -7,13 +7,13 @@
  * Otto Hylli <otto.hylli@tut.fi>
  */
 
-var arangoDbUrl = process.env.ARANGO_DB_URL || 'http://127.0.0.1:3000';
+var arangoDbUrl = process.env.ARANGO_DB_URL || 'http://130.230.142.101:3000';
 //var arangoDbUrl = 'http://newarangodb-siotad.paas.msv-project.com';
 
 var arangoDB = require('arangojs')(arangoDbUrl);
 arangoDB.useBasicAuth('root','admin');
 
-var dbName = "liquidiot-dev";
+var dbName = "casper-liquidiot-dev";
 var deviceCollection = "devices";
 var apiCollection = "interfaces";
 
