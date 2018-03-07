@@ -329,14 +329,17 @@ router.get("/generateSyncId", function(req, res){
     FOR device IN devices
       FOR app in device.apps[*]
         FILTER app.syncID != "-1"
-        RETURN app
+        RETURN {"syncId":app.syncID}
     `)
     .then(function(result){
-      console.log(result._result[0]);
-      if(result._result.length == 0){
-        
+      var newSyncId = 0;
+      for(var i = 0; i < result._result.length; i++){
+        if(parseInt(result._result[i]["syncId"]) > newSyncId){
+          newSyncId = parseInt(result._result[i]["syncId"])+1;
+        }
       }
-      res.status(200).send(true);
+      console.log(newSyncId);
+      res.status(200).send(newSyncId+"");
     })
     .catch(function(err){
       res.status(400).send( { 'message': err.toString() } );
