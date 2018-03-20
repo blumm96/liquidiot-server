@@ -334,7 +334,7 @@ router.get("/generateSyncId", function(req, res){
     .then(function(result){
       var newSyncId = 0;
       for(var i = 0; i < result._result.length; i++){
-        if(parseInt(result._result[i]["syncId"]) > newSyncId){
+        if(parseInt(result._result[i]["syncId"]) >= newSyncId){
           newSyncId = parseInt(result._result[i]["syncId"])+1;
         }
       }
