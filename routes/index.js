@@ -348,7 +348,7 @@ router.get("/generateSyncId", function(req, res){
 });
 
 // req = {syncID, aID, state}
-router.get("/stateupdate", function(req, res){
+router.post("/stateupdate", function(req, res){
   
   var db = req.arango.db;
   
