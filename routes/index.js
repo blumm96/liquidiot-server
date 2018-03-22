@@ -355,12 +355,12 @@ router.get("/stateupdate", function(req, res){
   db.query(aqlQuery`
     FOR device IN devices
       FOR app IN device.apps[*]
-        FILTER app.syncID == req.syncID
-        FILTER app.id != req.aID
+        FILTER app.syncID == req.body.syncID
+        FILTER app.id != req.body.aid
         RETURN {"deviceURL":device.url, "aid":app.id}
     `)
   .then(function (result){
-    var options = {method:'POST', data : {req.state}, json:true};
+    var options = {method:'POST', body : req.body, json:true};
     var promises = [];
     for(var i = 0; i < result._result.length; i++){
       options.uri = result._result[i]["deviceURL"];
