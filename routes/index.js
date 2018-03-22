@@ -347,4 +347,35 @@ router.get("/generateSyncId", function(req, res){
     
 });
 
+// req = {syncID, aID, state}
+router.get("/stateupdate", function(req, res){
+  
+  var db = req.arango.db;
+  
+  db.query(aqlQuery`
+    FOR device IN devices
+      FOR app IN device.apps[*]
+        FILTER app.syncID == req.syncID
+        FILTER app.id != req.aID
+        RETURN {"deviceURL":device.url, "aid":app.id}
+    `)
+  .then(function (result){
+    var options = {method:'POST', data : {req.state}, json:true};
+    var promises = [];
+    for(var i = 0; i < result._result.length; i++){
+      options.uri = result._result[i]["deviceURL"];
+      promises.push(rp(options));
+    }
+    Promise.all(promises.map(function(p){
+      return p.then(function(){});
+    })).then(function(){
+      console.log("All devices updated.");
+    });
+  })
+  .catch(function(err){
+    res.status(400).send({'message':err.toString()});
+  });
+  
+});
+
 module.exports = router;
