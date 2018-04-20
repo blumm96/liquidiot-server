@@ -17,6 +17,7 @@ var router = express.Router();
 var _ = require( 'lodash' );
 var mongo = require( 'mongoskin' );
 var toObjectID = mongo.helper.toObjectID;
+var rp = require('request-promise');
 
 var aqlQuery = require('arangojs').aqlQuery;
 
@@ -327,7 +328,7 @@ router.get("/generateSyncId", function(req, res){
 
   db.query(aqlQuery`
     FOR device IN devices
-      FOR app in device.apps[*]
+      FOR app IN device.apps[*]
         FILTER app.syncID != "-1"
         RETURN {"syncId":app.syncID}
     `)
@@ -351,19 +352,28 @@ router.get("/generateSyncId", function(req, res){
 router.post("/stateupdate", function(req, res){
   
   var db = req.arango.db;
-  
+  var syncID = req.body.syncID;
+  var aid = req.body.aid;
+  console.log(req.body);
+
   db.query(aqlQuery`
     FOR device IN devices
       FOR app IN device.apps[*]
-        FILTER app.syncID == req.body.syncID
-        FILTER app.id != req.body.aid
+        FILTER app.syncID == ${syncID}
+        FILTER app.id != ${aid}
         RETURN {"deviceURL":device.url, "aid":app.id}
     `)
   .then(function (result){
-    var options = {method:'POST', body : req.body, json:true};
+    var newData = {};
+    newData["time"] = req.body["time"];
+    newData["data"] = req.body["data"];
+    newData["dels"] = req.body["dels"];
+    var options = {method:'POST', json : true};
     var promises = [];
     for(var i = 0; i < result._result.length; i++){
-      options.uri = result._result[i]["deviceURL"];
+      options.uri = result._result[i]["deviceURL"]+"/sync";
+      newData["aid"] = result._result[i]["aid"];
+      options.body = newData;
       promises.push(rp(options));
     }
     Promise.all(promises.map(function(p){
